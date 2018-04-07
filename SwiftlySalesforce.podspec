@@ -23,7 +23,7 @@ s.name             = "SwiftlySalesforce"
   #  'SwiftlySalesforce' => ['Pod/Assets/*.png']
   }
 
-  s.dependency 'PromiseKit', '~> 4.0'
+  s.dependency 'PromiseKit', '~> 6.0'
   s.dependency 'Alamofire', '~> 4.0'
 
 end
