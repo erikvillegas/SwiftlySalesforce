@@ -23,6 +23,6 @@ s.summary          = "A Swift framework for the rapid development of native iOS 
 
   }
 
-  s.dependency 'PromiseKit', '~> 4.0'
+  s.dependency 'PromiseKit', '~> 6.0'
 
 end
