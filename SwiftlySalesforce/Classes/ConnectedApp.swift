@@ -24,7 +24,7 @@ open class ConnectedApp {
 	static public let defaultLoginHost = "login.salesforce.com"
 	
 	private var storeKey: OAuth2ResultStore.Key
-	private var pendingAuthorization: (promise: Promise<OAuth2Result>, fulfill: (OAuth2Result) -> (), reject: (Error) -> ())?
+	private var pendingAuthorization: (promise: Promise<OAuth2Result>, resolver: Resolver<OAuth2Result>)?
 	private var promisedRevocation: Promise<Void>?
 	
 	internal var authData: OAuth2Result? {
@@ -118,13 +118,13 @@ open class ConnectedApp {
 		if let urlEncodedString = callbackURL.fragment ?? callbackURL.query, let authData = try? OAuth2Result(urlEncodedString: urlEncodedString) {
 			self.authData = authData
 			if let pending = self.pendingAuthorization, pending.promise.isPending {
-				pending.fulfill(authData)
+				pending.resolver.fulfill(authData)
 			}
 		}
 		else {
 			// Can't make sense of the redirect URL
 			if let pending = self.pendingAuthorization, pending.promise.isPending {
-				pending.reject(ResponseError.invalidAuthorizationData)
+				pending.resolver.reject(ResponseError.invalidAuthorizationData)
 			}
 		}
 	}
@@ -144,13 +144,13 @@ open class ConnectedApp {
 				guard let token = (accessTokenOnly ? self.authData?.accessToken : self.authData?.refreshToken) else {
 					return Promise(error: ApplicationError.invalidState(message: "No token to revoke"))
 				}
-				return Promise(value: token)
+				return .value(token)
 			}.then {
 				(token: String) -> Promise<Void> in
 				let resource = Resource.revoke(token: token, host: self.loginHost)
 				return Requestor.data.request(resource: resource, connectedApp: self).asVoid()
-			}.then {
-				() -> () in
+			}.done {
+				_ in
 				self.authData = nil
 			}
 			self.promisedRevocation = promise
@@ -174,11 +174,11 @@ open class ConnectedApp {
 				firstly {
 					// Attempt to refresh access token
 					refresh(refreshToken: refreshToken)
-				}.then {
-					authData -> () in
+				}.done {
+					authData in
 					self.authData = authData
 					if let p = self.pendingAuthorization, p.promise.isPending {
-						p.fulfill(authData)
+						p.resolver.fulfill(authData)
 					}
 				}.catch {
 					_ in
@@ -195,7 +195,7 @@ open class ConnectedApp {
 					}
 					catch {
 						if let p = self.pendingAuthorization, p.promise.isPending {
-							p.reject(error)
+							p.resolver.reject(error)
 						}
 					}
 				}
@@ -212,7 +212,7 @@ open class ConnectedApp {
 				}
 				catch {
 					if let p = self.pendingAuthorization, p.promise.isPending {
-						p.reject(error)
+						p.resolver.reject(error)
 					}
 				}
 			}
@@ -225,7 +225,7 @@ open class ConnectedApp {
 	/// - Returns: Promise of OAuth2Result
 	private func refresh(refreshToken: String) -> Promise<OAuth2Result> {
 		let resource = Resource.refresh(refreshToken: refreshToken, consumerKey: consumerKey, host: loginHost)
-		return Requestor.data.request(resource: resource, connectedApp: self).asString().then {
+		return Requestor.data.request(resource: resource, connectedApp: self).asString().map {
 			(urlEncodedString) -> OAuth2Result in
 			return try OAuth2Result(urlEncodedString: urlEncodedString, refreshToken: refreshToken)
 		}

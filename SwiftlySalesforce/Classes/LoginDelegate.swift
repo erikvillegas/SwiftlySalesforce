@@ -80,21 +80,21 @@ extension LoginDelegate {
 	/// - Returns: Promise<Void>; chain to this for custom post-logout actions
 	public func logout(from connectedApp: ConnectedApp) -> Promise<Void> {
 		return Promise<Void> {
-			fulfill, reject in
+			seal in
 			firstly {
 				connectedApp.revoke()
-			}.then {
-				() -> () in
+			}.done {
+				_ in
 				if let loginURL = try? connectedApp.loginURL(), let window = UIApplication.shared.keyWindow {
 					// Replace current root view controller with Safari view controller for login
 					let loginVC = SafariLoginViewController(url: loginURL)
 					loginVC.replacedRootViewController = window.rootViewController
 					window.rootViewController = loginVC
 				}
-				fulfill(())
+				seal.fulfill(())
 			}.catch {
 				error -> () in
-				reject(error)
+				seal.reject(error)
 			}
 		}
 	}

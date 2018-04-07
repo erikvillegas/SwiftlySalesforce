@@ -46,7 +46,7 @@ open class Salesforce {
 			return try Requestor.defaultResponseHandler(data, response, error)
 		}
 		let resource = Resource.identity(version: version)
-		return requestor.request(resource: resource, connectedApp: connectedApp, responseHandler: handler).then(on: q) {
+		return requestor.request(resource: resource, connectedApp: connectedApp, responseHandler: handler).map(on: q) {
 			return try self.decoder.decode(Identity.self, from: $0)
 		}
 	}
@@ -74,7 +74,7 @@ open class Salesforce {
 	/// See https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_limits.htm
 	open func limits() -> Promise<[String:Limit]> {
 		let resource = Resource.limits(version: version)
-		return requestor.request(resource: resource, connectedApp: connectedApp).then(on: q) {
+		return requestor.request(resource: resource, connectedApp: connectedApp).map(on: q) {
 			return try self.decoder.decode([String:Limit].self, from: $0)
 		}
 	}
@@ -87,7 +87,7 @@ open class Salesforce {
 	/// - Returns: Promise of a QueryResult whose records, if any, are decoded as generic type 'T'
 	open func query<T: Decodable>(soql: String) -> Promise<QueryResult<T>> {
 		let resource = Resource.query(soql: soql, version: version)
-		return requestor.request(resource: resource, connectedApp: connectedApp).then(on: q) {
+		return requestor.request(resource: resource, connectedApp: connectedApp).map(on: q) {
 			return try self.decoder.decode(QueryResult<T>.self, from: $0)
 		}
 	}
@@ -98,7 +98,7 @@ open class Salesforce {
 	/// - Returns: Promise of a QueryResult whose records, if any, are decoded as Records
 	open func query(soql: String) -> Promise<QueryResult<Record>> {
 		let resource = Resource.query(soql: soql, version: version)
-		return requestor.request(resource: resource, connectedApp: connectedApp).then(on: q) {
+		return requestor.request(resource: resource, connectedApp: connectedApp).map(on: q) {
 			return try self.decoder.decode(QueryResult<Record>.self, from: $0)
 		}
 	}
@@ -127,7 +127,7 @@ open class Salesforce {
 	/// - Returns: Promise of a QueryResult
 	open func queryNext<T: Decodable>(path: String) -> Promise<QueryResult<T>> {
 		let resource = Resource.queryNext(path: path)
-		return requestor.request(resource: resource, connectedApp: connectedApp).then(on: q) {
+		return requestor.request(resource: resource, connectedApp: connectedApp).map(on: q) {
 			return try self.decoder.decode(QueryResult<T>.self, from: $0)
 		}
 	}
@@ -138,7 +138,7 @@ open class Salesforce {
 	/// - Returns: Promise of a QueryResult
 	open func queryNext(path: String) -> Promise<QueryResult<Record>> {
 		let resource = Resource.queryNext(path: path)
-		return requestor.request(resource: resource, connectedApp: connectedApp).then(on: q) {
+		return requestor.request(resource: resource, connectedApp: connectedApp).map(on: q) {
 			return try self.decoder.decode(QueryResult<Record>.self, from: $0)
 		}
 	}
@@ -152,7 +152,7 @@ open class Salesforce {
 	/// - Returns: Promise of a Decodable instance
 	open func retrieve<T: Decodable>(type: String, id: String, fields: [String]? = nil) -> Promise<T> {
 		let resource = Resource.retrieve(type: type, id: id, fields: fields, version: version)
-		return requestor.request(resource: resource, connectedApp: connectedApp).then(on: q) {
+		return requestor.request(resource: resource, connectedApp: connectedApp).map(on: q) {
 			return try self.decoder.decode(T.self, from: $0)
 		}
 	}
@@ -164,7 +164,7 @@ open class Salesforce {
 	/// - Returns: Promise of a Record instance
 	open func retrieve(type: String, id: String, fields: [String]? = nil) -> Promise<Record> {
 		let resource = Resource.retrieve(type: type, id: id, fields: fields, version: version)
-		return requestor.request(resource: resource, connectedApp: connectedApp).then(on: q) {
+		return requestor.request(resource: resource, connectedApp: connectedApp).map(on: q) {
 			return try self.decoder.decode(Record.self, from: $0)
 		}
 	}
@@ -204,7 +204,7 @@ open class Salesforce {
 			return Promise(error: error)
 		}
 		let resource = Resource.insert(type: type, data: data, version: version)
-		return requestor.request(resource: resource, connectedApp: connectedApp).then(on: q) {
+		return requestor.request(resource: resource, connectedApp: connectedApp).map(on: q) {
 			(data: Data) -> String in
 			let result: InsertResult = try self.decoder.decode(InsertResult.self, from: data)
 			return result.id
@@ -288,7 +288,7 @@ open class Salesforce {
 	/// - Returns: Promise<ObjectDescription>
 	open func describe(type: String) -> Promise<ObjectMetadata> {
 		let resource = Resource.describe(type: type, version: version)
-		return requestor.request(resource: resource, connectedApp: connectedApp).then(on: q) {
+		return requestor.request(resource: resource, connectedApp: connectedApp).map(on: q) {
 			return try self.decoder.decode(ObjectMetadata.self, from: $0)
 		}
 	}
@@ -306,7 +306,7 @@ open class Salesforce {
 	/// - Returns: Promise of an array of ObjectDescriptions
 	open func describeAll() -> Promise<[ObjectMetadata]> {
 		let resource = Resource.describeGlobal(version: version)
-		return requestor.request(resource: resource, connectedApp: connectedApp).then(on: q) {
+		return requestor.request(resource: resource, connectedApp: connectedApp).map(on: q) {
 			(data: Data) -> [ObjectMetadata] in
 			let result: DescribeAllResult = try self.decoder.decode(DescribeAllResult.self, from: data)
 			return result.sobjects
@@ -340,7 +340,7 @@ open class Salesforce {
 	/// - Returns: Promise of a String which holds the ID of the newly-inserted MobilePushServiceDevice record
 	open func registerForNotifications(deviceToken: String) -> Promise<String> {
 		let resource = Resource.registerForNotifications(deviceToken: deviceToken, version: version)
-		return requestor.request(resource: resource, connectedApp: connectedApp).then(on: q) {
+		return requestor.request(resource: resource, connectedApp: connectedApp).map(on: q) {
 			(data: Data) -> String in
 			struct InsertResult: Decodable {
 				var id: String

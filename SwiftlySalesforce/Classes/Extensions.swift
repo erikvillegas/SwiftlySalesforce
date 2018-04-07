@@ -57,7 +57,7 @@ public extension Promise where T == Data {
 	/// Convert Data to UIImage. Borrowed from PromiseKit - see:
 	/// https://github.com/PromiseKit/Foundation/blob/06ba5746d8bdfed3dde17679ef20d37922de867f/Sources/URLDataPromise.swift
 	public func asImage(on queue: DispatchQueue = DispatchQueue.global(qos: .userInitiated)) -> Promise<UIImage> {
-		return then(on: queue) {
+		return map(on: queue) {
 			data -> UIImage in
 			guard let img = UIImage(data: data), let cgimg = img.cgImage else {
 				throw ResponseError.invalidImageData
@@ -69,7 +69,7 @@ public extension Promise where T == Data {
 	
 	/// Convert Data to String
 	public func asString() -> Promise<String> {
-		return then {
+		return map {
 			data -> String in
 			guard let str = String(bytes: data, encoding: .utf8) else {
 				throw ResponseError.invalidStringData

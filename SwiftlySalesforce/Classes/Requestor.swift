@@ -63,14 +63,14 @@ extension Requestor {
 			let go = {
 				(req: URLRequest) -> Promise<Data> in
 				return Promise {
-					(fulfill, reject) -> () in
+					seal -> () in
 					let task: URLSessionDataTask = session.dataTask(with: req) {
 						(data, resp, err) -> Void in
 						do {
-							fulfill(try responseHandler(data, resp, err))
+							seal.fulfill(try responseHandler(data, resp, err))
 						}
 						catch {
-							reject(error)
+							seal.reject(error)
 						}
 					}
 					task.resume()
@@ -78,12 +78,12 @@ extension Requestor {
 			}
 			
 			return Promise<OAuth2Result> {
-				(fulfill, reject) -> () in
+				seal -> () in
 				if let auth = connectedApp.authData {
-					fulfill(auth)
+					seal.fulfill(auth)
 				}
 				else {
-					reject(RequestError.userAuthenticationRequired)
+					seal.reject(RequestError.userAuthenticationRequired)
 				}
 			}.then {
 				return try go(resource.asURLRequest(authData: $0))
