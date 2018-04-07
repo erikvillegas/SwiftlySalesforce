@@ -41,7 +41,7 @@ open class Salesforce {
 					return .success
 				}
 			}.validateSalesforceResponse().responseJSONDictionary()
-		}.then(on: q) {
+		}.map(on: q) {
 			(json: [String: Any]) -> Identity in
 			return try Identity(json: json)
 		}
@@ -53,7 +53,7 @@ open class Salesforce {
 	open func limits() -> Promise<[Limit]> {
 		return request(.limits(version: version)) {
 			Alamofire.request($0).validateSalesforceResponse().responseJSON()
-		}.then(on: q) {
+		}.map(on: q) {
 			(result: Any) -> [Limit] in
 			guard let json = result as? [String: [String: Any]] else {
 				throw SerializationError.invalid(result, message: "Invalid limit response")
@@ -73,7 +73,7 @@ open class Salesforce {
 	open func query(soql: String) -> Promise<QueryResult> {
 		return request(.query(soql: soql, version: version)) {
 			Alamofire.request($0).validateSalesforceResponse().responseJSONDictionary()
-		}.then(on: bgq) {
+		}.map(on: bgq) {
 			(json: [String: Any]) -> QueryResult in
 			return try QueryResult(json: json)
 		}
@@ -95,7 +95,7 @@ open class Salesforce {
 	open func queryNext(path: String) -> Promise<QueryResult> {
 		return request(.queryNext(path: path)) {
 			Alamofire.request($0).validateSalesforceResponse().responseJSONDictionary()
-		}.then(on: q) {
+		}.map(on: q) {
 			(json: [String: Any]) -> QueryResult in
 			return try QueryResult(json: json)
 		}
@@ -129,7 +129,7 @@ open class Salesforce {
 	open func insert(type: String, fields: [String: Any]) -> Promise<String> {
 		return request(.insert(type: type, fields: fields, version: version)) {
 			Alamofire.request($0).validateSalesforceResponse().responseJSONDictionary()
-		}.then (on: q) {
+		}.map (on: q) {
 			(json) -> String in
 			guard let id = json["id"] as? String else {
 				throw SerializationError.invalid(json, message: "Cannot determine ID of inserted record!")
@@ -166,7 +166,7 @@ open class Salesforce {
 	open func describe(type: String) -> Promise<ObjectDescription> {
 		return request(.describe(type: type, version: version)) {
 			Alamofire.request($0).validateSalesforceResponse().responseJSONDictionary()
-		}.then(on: q) {
+		}.map(on: q) {
 			(json: [String: Any]) -> ObjectDescription in
 			return try ObjectDescription(json: json)
 		}
@@ -186,7 +186,7 @@ open class Salesforce {
 	open func describeAll() -> Promise<[String: ObjectDescription]> {
 		return request(.describeGlobal(version: version)) {
 			Alamofire.request($0).validateSalesforceResponse().responseJSONDictionary()
-		}.then(on: q) {
+		}.map(on: q) {
 			(result: [String: Any]) -> [String: ObjectDescription] in
 			guard let jsonArray = result["sobjects"] as? [[String: Any]] else {
 				throw SerializationError.invalid(result, message: "Cannot parse response")
@@ -208,7 +208,7 @@ open class Salesforce {
 	open func fetchImage(path: String) -> Promise<UIImage> {
 		return request(.custom(method: .get, baseURL: nil, path: path, parameters: nil, headers: ["Accept": "image/*"])) {
 			Alamofire.request($0).validateSalesforceResponse().responseData()
-		}.then(on: bgq) {
+		}.map(on: bgq) {
 			(data: Data) -> UIImage in
 			guard let image = UIImage(data: data) else {
 				throw SerializationError.invalid("Image Data", message: "Unable to create image")
@@ -224,7 +224,7 @@ open class Salesforce {
 	open func fetchImage(url: URL) -> Promise<UIImage> {
 		return request(.custom(method: .get, baseURL: url, path: nil, parameters: nil, headers: ["Accept": "image/*"])) {
 			Alamofire.request($0).validateSalesforceResponse().responseData()
-		}.then(on: bgq) {
+		}.map(on: bgq) {
 			(data: Data) -> UIImage in
 			guard let image = UIImage(data: data) else {
 				throw SerializationError.invalid("Image Data", message: "Unable to create image")
@@ -282,13 +282,13 @@ open class Salesforce {
 	private func request<T>(requestor: @escaping (OAuth2Result) throws -> Promise<T>) -> Promise<T> {
 		return Promise<OAuth2Result> {
 			// Get credentials
-			(fulfill, reject) -> () in
+			seal -> () in
 			if let authData = connectedApp.authData {
 				// Use credentials we already have
-				fulfill(authData)
+				seal.fulfill(authData)
 			}
 			else {
-				reject(SalesforceError.userAuthenticationRequired)
+				seal.reject(SalesforceError.userAuthenticationRequired)
 			}
 		}.then {
 			// Send request

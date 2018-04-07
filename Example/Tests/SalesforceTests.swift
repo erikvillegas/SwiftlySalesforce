@@ -50,7 +50,7 @@ class SalesforceTests: XCTestCase, MockData, LoginDelegate {
 	func testThatItGetsIdentity() {
 		let exp = expectation(description: "Identity")
 		salesforce.identity()
-			.then {
+			.done {
 				identity -> () in
 				XCTAssertEqual(identity.userID, self.salesforce.connectedApp.authData!.userID)
 				exp.fulfill()
@@ -64,7 +64,7 @@ class SalesforceTests: XCTestCase, MockData, LoginDelegate {
 	func testThatItGetsLimits() {
 		let exp = expectation(description: "limits")
 		salesforce.limits()
-			.then {
+			.done {
 				limits -> () in
 				XCTAssertTrue(limits.count > 20) // ~23 as of Winter '17
 				exp.fulfill()
@@ -79,7 +79,7 @@ class SalesforceTests: XCTestCase, MockData, LoginDelegate {
 		let soql = "SELECT Id FROM Account WHERE CreatedDate > NEXT_WEEK"
 		let exp = expectation(description: "Query")
 		salesforce.query(soql: soql)
-			.then {
+			.done {
 				queryResult -> () in
 				XCTAssertEqual(queryResult.records.count, 0)
 				XCTAssertEqual(queryResult.totalSize, 0)
@@ -107,7 +107,7 @@ class SalesforceTests: XCTestCase, MockData, LoginDelegate {
 			.then {
 				(queryResult) -> Promise<Record> in
 				self.salesforce.retrieve(type: type, id: queryResult.records[0].id!)
-			}.then {
+			}.done {
 				// Then
 				record -> () in
 				XCTAssertEqual(type, record.type!)
@@ -130,7 +130,7 @@ class SalesforceTests: XCTestCase, MockData, LoginDelegate {
 		
 		first {
 			salesforce.retrieve(type: type, id: id)
-			}.then {
+			}.done {
 				// Then
 				result -> () in
 				XCTFail()
@@ -153,7 +153,7 @@ class SalesforceTests: XCTestCase, MockData, LoginDelegate {
 		let exp = expectation(description: "Insert \(type) record")
 		first {
 			salesforce.insert(type: type, fields: fields)
-			}.then {
+			}.done {
 				// Then
 				id -> () in
 				XCTAssertTrue(id.hasPrefix("001"))
@@ -174,7 +174,7 @@ class SalesforceTests: XCTestCase, MockData, LoginDelegate {
 		// When
 		let exp = expectation(description: "Describe Account")
 		salesforce.describe(type: type)
-			.then {
+			.done {
 				// Then
 				(desc: ObjectDescription) -> () in
 				XCTAssertEqual(desc.name, "Account")
@@ -196,7 +196,7 @@ class SalesforceTests: XCTestCase, MockData, LoginDelegate {
 		// When
 		let exp = expectation(description: "Describe All (Describe Global)")
 		salesforce.describeAll()
-			.then {
+			.done {
 				(results: [String: ObjectDescription]) -> () in
 				guard let acct = results["Account"], acct.name == "Account", acct.keyPrefix == "001",
 					let contact = results["Contact"], contact.name == "Contact"
@@ -219,7 +219,7 @@ class SalesforceTests: XCTestCase, MockData, LoginDelegate {
 		// When
 		let exp = expectation(description: "Describe nonexistent object")
 		salesforce.describe(type: type)
-			.then {
+			.done {
 				// Then
 				desc -> () in
 				XCTFail()
@@ -240,7 +240,7 @@ class SalesforceTests: XCTestCase, MockData, LoginDelegate {
 		let exp = expectation(description: "Describe multiple objects")
 		first {
 			salesforce.describe(types: types)
-			}.then {
+			}.done {
 				result -> () in
 				XCTAssertEqual(result.count, types.count)
 				XCTAssertEqual(result.map { $0.name }, types)
@@ -261,7 +261,7 @@ class SalesforceTests: XCTestCase, MockData, LoginDelegate {
 		let exp = expectation(description: "Describe multiple objects")
 		first {
 			salesforce.describe(types: types)
-			}.then {
+			}.done {
 				result -> () in
 				XCTFail()
 			}.catch {

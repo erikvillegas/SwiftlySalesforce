@@ -43,7 +43,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         let deviceTokenString = deviceToken.reduce("", {$0 + String(format: "%02X", $1)})
         salesforce.registerForNotifications(deviceToken: deviceTokenString)
-            .then {
+            .done {
                 (result) -> () in
                 print("Successfully registered for salesforce notifications")
             }.catch {

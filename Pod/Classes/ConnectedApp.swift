@@ -19,7 +19,7 @@ open class ConnectedApp {
 	
 	private var storeKey: OAuth2ResultStore.Key?
 	
-	private var pendingAuthorization: (promise: Promise<OAuth2Result>, fulfill: (OAuth2Result) -> (), reject: (Error) -> ())?
+    private var pendingAuthorization: (promise: Promise<OAuth2Result>, resolver: Resolver<OAuth2Result>)?
 	private var promisedRevocation: Promise<Void>?
 	
 	internal var authData: OAuth2Result? {
@@ -111,13 +111,13 @@ open class ConnectedApp {
 		if let urlEncodedString = redirectURL.fragment ?? redirectURL.query, let authData = try? OAuth2Result(urlEncodedString: urlEncodedString) {
 			self.authData = authData
 			if let pending = self.pendingAuthorization, pending.promise.isPending {
-				pending.fulfill(authData)
+				pending.resolver.fulfill(authData)
 			}
 		}
 		else {
 			// Can't make sense of the redirect URL
 			if let pending = self.pendingAuthorization, pending.promise.isPending {
-				pending.reject(SerializationError.invalid(redirectURL, message: "Can't parse redirect URL: \(redirectURL)"))
+				pending.resolver.reject(SerializationError.invalid(redirectURL, message: "Can't parse redirect URL: \(redirectURL)"))
 			}
 		}
 	}
@@ -138,11 +138,11 @@ open class ConnectedApp {
 				firstly {
 					// Attempt to refresh access token
 					refresh(refreshToken: refreshToken)
-				}.then {
+				}.done {
 					authData -> () in
 					self.authData = authData
 					if let p = self.pendingAuthorization, p.promise.isPending {
-						p.fulfill(authData)
+						p.resolver.fulfill(authData)
 					}
 				}.catch {
 					_ in
@@ -159,7 +159,7 @@ open class ConnectedApp {
 					}
 					catch {
 						if let p = self.pendingAuthorization, p.promise.isPending {
-							p.reject(error)
+							p.resolver.reject(error)
 						}
 					}
 				}
@@ -176,7 +176,7 @@ open class ConnectedApp {
 				}
 				catch {
 					if let p = self.pendingAuthorization, p.promise.isPending {
-						p.reject(error)
+						p.resolver.reject(error)
 					}
 				}
 			}
@@ -196,9 +196,9 @@ open class ConnectedApp {
 		}
 		else {
 			let promise = Promise<Void> {
-				fulfill, reject in
+				seal in
 				guard let token = (accessTokenOnly ? nil : self.authData?.refreshToken) ?? self.authData?.accessToken else {
-					reject(ApplicationError.invalidState(message: "No token to revoke"))
+					seal.reject(ApplicationError.invalidState(message: "No token to revoke"))
 					return
 				}
 				let urlString = "https://\(self.loginHost)/services/oauth2/revoke"
@@ -209,10 +209,10 @@ open class ConnectedApp {
 						switch response.result {
 						case .success:
 							self.authData = nil
-							fulfill(())
+							seal.fulfill(())
 						case .failure:
 							// Salesforce doesn't provide an error code or description for GET revoke calls, so we create an error here
-							reject(SalesforceError.resourceException(code: "TOKEN_REVOCATION_ERROR", message: "Error revoking token", fields: nil))
+							seal.reject(SalesforceError.resourceException(code: "TOKEN_REVOCATION_ERROR", message: "Error revoking token", fields: nil))
 						}
 				}
 			}
@@ -234,7 +234,7 @@ open class ConnectedApp {
 			"refresh_token": refreshToken]
 		
 		return Promise {
-			fulfill, reject in
+			seal in
 			Alamofire.request(URL(string: urlString)!, method: .post, parameters: params, encoding: URLEncoding.default)
 			.validate(statusCode: 200..<300)
 			.responseString {
@@ -243,13 +243,13 @@ open class ConnectedApp {
 				case .success(let urlEncodedString):
 					do {
 						let authData = try OAuth2Result(urlEncodedString: urlEncodedString, refreshToken: refreshToken)
-						fulfill(authData)
+						seal.fulfill(authData)
 					}
 					catch {
-						reject(error)
+						seal.reject(error)
 					}
 				case .failure(let error):
-					reject(error)
+					seal.reject(error)
 				}
 			}
 		}

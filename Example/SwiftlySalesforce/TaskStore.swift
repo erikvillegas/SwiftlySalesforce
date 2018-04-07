@@ -18,9 +18,9 @@ public final class TaskStore {
 	public func getTasks(refresh: Bool = false) -> Promise<[Task]> {
 		
 		return Promise<[Task]> {
-			fulfill, reject in
+			seal in
 			if let tasks = self.cache, !refresh {
-				fulfill(tasks)
+				seal.fulfill(tasks)
 			}
 			else {
 				first {
@@ -29,18 +29,18 @@ public final class TaskStore {
 					salesforce.identity()
 				}.then {
 					// Get tasks owned by user
-					userInfo in
+					userInfo -> Promise<QueryResult> in
 					let soql = "SELECT Id,Subject,Status,What.Name FROM Task WHERE OwnerId = '\(userInfo.userID)' ORDER BY CreatedDate DESC"
 					return salesforce.query(soql: soql)
-				}.then {
+				}.done {
 					// Parse JSON into Task instances and cache in memory
 					(result: QueryResult) -> () in
 					let tasks = result.records.map { Task(dictionary: $0) }
 					self.cache = tasks
-					fulfill(tasks)
+					seal.fulfill(tasks)
 				}.catch {
 					error in
-					reject(error)
+					seal.reject(error)
 				}
 			}
 		}

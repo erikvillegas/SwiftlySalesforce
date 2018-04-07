@@ -38,7 +38,7 @@ final class MasterViewController: UITableViewController {
 	
 	@IBAction func logoutButtonPressed(sender: AnyObject) {
 		if let app = UIApplication.shared.delegate as? LoginDelegate {
-			app.logout(from: salesforce.connectedApp).then {
+			app.logout(from: salesforce.connectedApp).done {
 				() -> () in
 				TaskStore.shared.clear()
 				self.photoView.image = nil
@@ -71,10 +71,10 @@ final class MasterViewController: UITableViewController {
 			else {
 				throw TaskForceError.generic(code: -231, message: "No image URL!")
 			}
-		}.then {
+		}.done {
 			image in
 			self.photoView.image = image
-		}.always {
+		}.ensure {
 			self.refreshControl?.endRefreshing()
 			self.refreshControl?.isEnabled = true
 			self.tableView.reloadData()

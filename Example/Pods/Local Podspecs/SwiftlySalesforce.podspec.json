@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "PromiseKit": [
-      "~> 4.0"
+      "~> 6.0"
     ],
     "Alamofire": [
       "~> 4.0"
