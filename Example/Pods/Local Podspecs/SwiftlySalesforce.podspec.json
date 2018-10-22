@@ -13,19 +13,20 @@
     "tag": "4.0.5"
   },
   "social_media_url": "https://twitter.com/mike4aday",
+  "swift_version": "4.2",
   "platforms": {
-    "ios": "10.0"
+    "ios": "11.0"
   },
   "requires_arc": true,
-  "source_files": "Pod/Classes/**/*",
+  "source_files": "Pod/Classes/**/*.{h,m,swift}",
   "resource_bundles": {
   },
   "dependencies": {
     "PromiseKit": [
-      "~> 6.0"
+      "~> 6.5.2"
     ],
     "Alamofire": [
-      "~> 4.0"
+      "~> 4.7.3 "
     ]
   }
 }

@@ -32,7 +32,7 @@ final class DetailViewController: UITableViewController {
 	
 	public override func viewDidLoad() {
 		super.viewDidLoad()
-		refreshControl?.addTarget(self, action: #selector(DetailViewController.handleRefresh), for: UIControlEvents.valueChanged)
+        refreshControl?.addTarget(self, action: #selector(DetailViewController.handleRefresh), for: UIControl.Event.valueChanged)
 		loadData()
 	}
 	
@@ -82,7 +82,7 @@ final class DetailViewController: UITableViewController {
 		}
 	}
 	
-	func handleRefresh(refreshControl: UIRefreshControl) {
+    @objc func handleRefresh(refreshControl: UIRefreshControl) {
 		loadData()
 	}
 	

@@ -14,16 +14,17 @@ s.name             = "SwiftlySalesforce"
   s.author           = { "Michael Epstein" => "@mike4aday" }
   s.source           = { :git => "https://github.com/mike4aday/SwiftlySalesforce.git", :tag => s.version.to_s }
   s.social_media_url = 'https://twitter.com/mike4aday'
+  s.swift_version    = '4.2'
 
-  s.platform     = :ios, '10.0'
+  s.platform     = :ios, '11.0'
   s.requires_arc = true
 
-  s.source_files = 'Pod/Classes/**/*'
+  s.source_files = 'Pod/Classes/**/*.{h,m,swift}'
   s.resource_bundles = {
   #  'SwiftlySalesforce' => ['Pod/Assets/*.png']
   }
 
-  s.dependency 'PromiseKit', '~> 6.0'
-  s.dependency 'Alamofire', '~> 4.0'
+  s.dependency 'PromiseKit', '~> 6.5.2'
+  s.dependency 'Alamofire', '~> 4.7.3 '
 
 end

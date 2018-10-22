@@ -125,7 +125,7 @@ public extension Dictionary where Key == String, Value == Any {
 		guard let attrs = self["attributes"] as? [String: Any],
 			let type = attrs["type"] as? String,
 			let path = attrs["url"] as? String,
-			let id = path.components(separatedBy: "/").last, id.characters.count == 15 || id.characters.count == 18 else {
+			let id = path.components(separatedBy: "/").last, id.count == 15 || id.count == 18 else {
 				return nil
 		}
 		return (id, type, path)

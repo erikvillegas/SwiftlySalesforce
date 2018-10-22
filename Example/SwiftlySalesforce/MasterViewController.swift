@@ -17,7 +17,7 @@ final class MasterViewController: UITableViewController {
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()
-		refreshControl?.addTarget(self, action: #selector(MasterViewController.handleRefresh), for: UIControlEvents.valueChanged)
+        refreshControl?.addTarget(self, action: #selector(MasterViewController.handleRefresh), for: UIControl.Event.valueChanged)
 		loadData(refresh: true)
 	}
 	
@@ -88,7 +88,7 @@ final class MasterViewController: UITableViewController {
 	}
 	
 	/// Refresh control handler
-	func handleRefresh(refreshControl: UIRefreshControl) {
+    @objc func handleRefresh(refreshControl: UIRefreshControl) {
 		loadData(refresh: true)
 	}
 }
@@ -115,8 +115,8 @@ extension MasterViewController {
 extension UIViewController {
 	
 	func alert(title: String, message: String) {
-		let alert = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.alert)
-		alert.addAction(UIAlertAction(title: "Close", style: UIAlertActionStyle.default, handler: nil))
+        let alert = UIAlertController(title: title, message: message, preferredStyle: UIAlertController.Style.alert)
+        alert.addAction(UIAlertAction(title: "Close", style: UIAlertAction.Style.default, handler: nil))
 		self.present(alert, animated: true, completion: nil)
 	}
 	

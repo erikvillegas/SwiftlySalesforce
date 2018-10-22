@@ -1,30 +1,35 @@
 PODS:
-  - Alamofire (4.7.1)
-  - PromiseKit (6.2.4):
-    - PromiseKit/CorePromise (= 6.2.4)
-    - PromiseKit/Foundation (= 6.2.4)
-    - PromiseKit/UIKit (= 6.2.4)
-  - PromiseKit/CorePromise (6.2.4)
-  - PromiseKit/Foundation (6.2.4):
+  - Alamofire (4.7.3)
+  - PromiseKit (6.5.2):
+    - PromiseKit/CorePromise (= 6.5.2)
+    - PromiseKit/Foundation (= 6.5.2)
+    - PromiseKit/UIKit (= 6.5.2)
+  - PromiseKit/CorePromise (6.5.2)
+  - PromiseKit/Foundation (6.5.2):
     - PromiseKit/CorePromise
-  - PromiseKit/UIKit (6.2.4):
+  - PromiseKit/UIKit (6.5.2):
     - PromiseKit/CorePromise
   - SwiftlySalesforce (4.0.5):
-    - Alamofire (~> 4.0)
-    - PromiseKit (~> 6.0)
+    - Alamofire (~> 4.7.3)
+    - PromiseKit (~> 6.5.2)
 
 DEPENDENCIES:
   - SwiftlySalesforce (from `../`)
 
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - Alamofire
+    - PromiseKit
+
 EXTERNAL SOURCES:
   SwiftlySalesforce:
-    :path: ../
+    :path: "../"
 
 SPEC CHECKSUMS:
-  Alamofire: 68d7d521118d49c615a8d2214d87cdf525599d30
-  PromiseKit: 625b1fc69944fc839503748101c5968cf54b527b
-  SwiftlySalesforce: b32d3d76b9a845f27db4c9d5adcb5600e83cb34e
+  Alamofire: c7287b6e5d7da964a70935e5db17046b7fde6568
+  PromiseKit: 27c1601bfb73405871b805bcb8cf7e55c4dad3db
+  SwiftlySalesforce: 8a80fb025af7eb56a8c8c0b4ef77dced229e25a4
 
 PODFILE CHECKSUM: 6a5cfa5f32ca1645b6ace30e1a5e00bece280cc9
 
-COCOAPODS: 1.4.0
+COCOAPODS: 1.5.3
