@@ -13,6 +13,7 @@ public struct PicklistItem {
 	public let isDefault: Bool
 	public let label: String
 	public let value: String
+    public let validFor: String?
 	
 	public init(json: [String: Any]) throws {
 		
@@ -29,5 +30,6 @@ public struct PicklistItem {
 		self.isDefault = isDefault
 		self.label = label
 		self.value = value
+        self.validFor = json["validFor"] as? String
 	}
 }
