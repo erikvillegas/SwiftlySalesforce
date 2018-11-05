@@ -114,7 +114,7 @@ public extension DataRequest {
 			default:
 				return .success // The next .validate() call will catch other errors not caught above
 			}
-		}.validate()
+		}
 	}
 }
 

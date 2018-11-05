@@ -269,6 +269,22 @@ open class Salesforce {
 			Alamofire.request($0).validateSalesforceResponse().responseData()
 		}
 	}
+    
+    /// Use this method to call a Salesforce REST API endpoint that's not covered by the other methods.
+    /// Note: baseURL and path should not both be nil
+    /// - Parameter method: HTTP method
+    /// - Parameter baseURL: Base URL to which the path parameter will be appended. If nil, then user's "instance URL" will be used
+    /// - Parameter path: Absolute path to endpoint, relative to "baseURL" parameter or, if "baseURL" is nil, then relative to the user's "instance URL"
+    /// - Parameter parameters: Dictionary of parameter name/value pairs
+    /// - Parameter headers: Dictionary of HTTP header values
+    /// - Returns: Promise of HTTP response and Data
+    open func custom(method: HTTPMethod = .get, baseURL: URL? = nil, path: String? = nil, parameters: [String: Any]? = nil, headers: [String: String]? = nil) -> Promise<(HTTPURLResponse, Data)> {
+        return request(.custom(method: method, baseURL: baseURL, path: path, parameters: parameters, headers: headers)) {
+            Alamofire.request($0).validateSalesforceResponse().response()
+        }.map { _, response, data in
+            return (response, data)
+        }
+    }
 	
 	private func request<T>(_ resource: Resource, promiser: @escaping (URLRequest) -> Promise<T>) -> Promise<T> {
 		let requestor = {
