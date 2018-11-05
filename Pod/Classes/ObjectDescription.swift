@@ -11,6 +11,7 @@
 public struct ObjectDescription {
 	
 	public let fields: [String: FieldDescription]?
+    public let recordTypeIds: [String: String]?
 	public let isCreateable: Bool
 	public let isCustom: Bool
 	public let isCustomSetting: Bool
@@ -64,6 +65,18 @@ public struct ObjectDescription {
 			}
 			return nil
 		}()
+        
+        self.recordTypeIds = {
+            if let recordTypeJsons = json["recordTypeInfos"] as? [[String: Any]], let recordTypeInfos = try? recordTypeJsons.map { try RecordTypeInfo(json: $0) } {
+                var dict = [String: String]()
+                for recordTypeInfo in recordTypeInfos {
+                    dict[recordTypeInfo.name] = recordTypeInfo.recordTypeId
+                }
+                return dict
+            }
+            return nil
+        }()
+        
 		self.isCreateable = isCreateable
 		self.isCustom = isCustom
 		self.isCustomSetting = isCustomSetting

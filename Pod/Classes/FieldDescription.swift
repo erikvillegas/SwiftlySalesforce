@@ -79,3 +79,21 @@ public struct FieldDescription {
 	}
 }
 
+public struct RecordTypeInfo {
+    
+    public let recordTypeId: String
+    public let name: String
+    
+    init(json: [String: Any]) throws {
+        
+        guard
+            let recordTypeId = json["recordTypeId"] as? String,
+            let name = json["name"] as? String
+            else {
+                throw SerializationError.invalid(json, message: "Unable to create RecordTypeInfo")
+        }
+        
+        self.recordTypeId = recordTypeId
+        self.name = name
+    }
+}
