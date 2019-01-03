@@ -12,7 +12,7 @@ public struct Identity {
 	
 	public let displayName: String
 	public let language: String?
-	public let lastModifiedDate: Date
+	public let lastModifiedDate: Date?
 	public let locale: String?
 	public let mobilePhone: String?
 	public let orgID: String
@@ -28,7 +28,6 @@ public struct Identity {
 		
 		guard
 			let displayName = json["display_name"] as? String,
-			let lastModifiedDate = json.date(for: "last_modified_date"),
 			let orgID = json["organization_id"] as? String,
 			let userID = json["user_id"] as? String,
 			let username = json["username"] as? String,
@@ -42,7 +41,7 @@ public struct Identity {
 	
 		self.displayName = displayName
 		self.language = json["language"] as? String
-		self.lastModifiedDate = lastModifiedDate
+		self.lastModifiedDate = json.date(for: "last_modified_date")
 		self.locale = json["locale"] as? String
 		self.mobilePhone = json["mobile_phone"] as? String
 		self.orgID = orgID
