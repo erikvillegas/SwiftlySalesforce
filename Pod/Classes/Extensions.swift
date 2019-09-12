@@ -99,23 +99,39 @@ public extension DataRequest {
 				return .failure(SalesforceError.userAuthenticationRequired)
 			case 400..<500:
 				// See: https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/errorcodes.htm
-				if let data = data,
-					let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [[String: Any]],
-					let firstError = json?[0],
-					let errorCode = firstError["errorCode"] as? String,
-					let message = firstError["message"] as? String {
-					return .failure(SalesforceError.resourceException(code: errorCode, message: message, fields: firstError["fields"] as? [String]))
-				}
-				else {
-					return .failure(SalesforceError.resourceException(code: "UNKNOWN_ERROR", message: "Unknown error. HTTP response status code: \(response.statusCode)", fields: nil))
-				}
+				return .failure(self.extractError(data: data))
 			case 500:
-				return .failure(SalesforceError.serverFailure)
+                return .failure(self.extractError(data: data))
 			default:
 				return .success // The next .validate() call will catch other errors not caught above
 			}
 		}
 	}
+    
+    public func extractError(data: Data?) -> SalesforceError {
+        guard let data = data else { return .serverFailure }
+        
+        let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments)
+        var errorObject: [String: Any]? = nil
+        
+        if let jsonArray = json as? [[String: Any]] {
+            errorObject = jsonArray.first
+        }
+        else if let jsonObject = json as? [String: Any] {
+            errorObject = jsonObject
+        }
+        
+        if let errorObject = errorObject,
+            let errorCode = errorObject["errorCode"] as? String,
+            let message = errorObject["message"] as? String {
+            
+            let fields = errorObject["fields"] as? [String]
+            return .resourceException(code: errorCode, message: message, fields: fields)
+        }
+        else {
+            return .serverFailure
+        }
+    }
 }
 
 /// Extension for JSON dictionaries acting as Salesforce records
