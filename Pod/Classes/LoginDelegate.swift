@@ -55,10 +55,12 @@ extension LoginDelegate {
 			throw ApplicationError.invalidState(message: "No key window!")
 		}
 		
-		// Replace current root view controller with Safari view controller for login
-		let loginVC = SafariLoginViewController(url: url)
-		loginVC.replacedRootViewController = window.rootViewController
-		window.rootViewController = loginVC
+        if String(describing: type(of: window)) != "ICMWindow" {
+            // Replace current root view controller with Safari view controller for login
+            let loginVC = SafariLoginViewController(url: url)
+            loginVC.replacedRootViewController = window.rootViewController
+            window.rootViewController = loginVC
+        }
 	}
 	
 	/// Handles the redirect URL returned by Salesforce after OAuth2 authentication and authorization.
